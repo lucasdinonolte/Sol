@@ -1,0 +1,10 @@
+{
+  "name": "toy",
+  "version": "0.0.1",
+  "description": "A stupid scripting language built for learning purposes",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "cli": "node src/cli.js"
+  }
+}
