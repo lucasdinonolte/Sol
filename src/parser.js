@@ -63,6 +63,11 @@ module.exports = (tokens) => {
             name: token.value,
             params: [],
           }
+        } else if (token.value === 'if') {
+          node = {
+            type: 'Condition',
+            params: [],
+          }
         } else if (token.value === 'fn') {
           node = {
             type: 'Function',

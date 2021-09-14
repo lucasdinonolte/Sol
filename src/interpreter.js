@@ -36,6 +36,10 @@ const evaluate = (exp, env) => {
         }
         return(evaluate(body, scope))
       }
+    case 'Condition':
+      const condition = evaluate(exp.params[0], env)
+      const then = exp.params[1]
+      return condition ? evaluate(then, env) : (!!exp.params[2] ? evaluate(exp.params[2], env) : false)
     case 'Variable':
       return env.get(exp.value)
     case 'Program':

@@ -1,2 +1,2 @@
-(def foo (fn [x] (add x x)))
-(println (foo 2))
+(def vec [1 2 3 4])
+(println (count vec))
