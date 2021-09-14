@@ -20,9 +20,22 @@ class Environment {
 const evaluate = (exp, env) => {
   switch (exp.type) {
     case 'NumberLiteral':
+    case 'ColorLiteral':
     case 'StringLiteral':
       return exp.value
     
+    case 'Vector':
+      return [...(exp.values.map(val => evaluate(val, env)))]
+    case 'Function':
+      return function() {
+        const vars = exp.params[0].values.map(i => i.value)
+        const body = exp.params[1]
+        const scope = new Environment(env)
+        for (let i = 0; i < vars.length; i++) {
+          scope.def(vars[i], i < arguments.length ? arguments[i] : false)
+        }
+        return(evaluate(body, scope))
+      }
     case 'Variable':
       return env.get(exp.value)
     case 'Program':

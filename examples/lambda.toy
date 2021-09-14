@@ -1,0 +1,1 @@
+(def square (lambda (x) (mul x x)))

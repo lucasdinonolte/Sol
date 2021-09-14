@@ -9,7 +9,7 @@ module.exports = (tokens) => {
 
       return {
         type: 'NumberLiteral',
-        value: parseInt(token.value),
+        value: parseFloat(token.value),
       }
     }
 
@@ -18,6 +18,15 @@ module.exports = (tokens) => {
 
       return {
         type: 'StringLiteral',
+        value: token.value,
+      }
+    }
+
+    if (token.type === 'color') {
+      current++
+
+      return {
+        type: 'ColorLiteral',
         value: token.value,
       }
     }
@@ -35,25 +44,61 @@ module.exports = (tokens) => {
       token = tokens[++current]
 
       let node
-      if (token.value === 'def') {
-        token = tokens[++current]
+
+      if (token.type === 'paren' && token.value === '(') {
         node = {
-          type: 'Assignment',
-          name: token.value,
-          params: [],
+          type: 'Program',
+          body: [],
+        }
+
+        while ( (token.type !== 'paren') || (token.type === 'paren' && token.value !== ')') ) {
+          node.body.push(walk())
+          token = tokens[current]
         }
       } else {
-        node = {
-          type: 'CallExpression',
-          name: token.value,
-          params: [],
+        if (token.value === 'def') {
+          token = tokens[++current]
+          node = {
+            type: 'Assignment',
+            name: token.value,
+            params: [],
+          }
+        } else if (token.value === 'fn') {
+          node = {
+            type: 'Function',
+            name: token.value,
+            params: []
+          }
+        } else {
+          node = {
+            type: 'CallExpression',
+            name: token.value,
+            params: [],
+          }
+        }
+
+        token = tokens[++current]
+
+        while ( (token.type !== 'paren') || (token.type === 'paren' && token.value !== ')') ) {
+          node.params.push(walk())
+          token = tokens[current]
         }
       }
 
+      current++
+      return node
+    }
+
+    if (token.type === 'bracket' && token.value === '[') {
       token = tokens[++current]
 
-      while ( (token.type !== 'paren') || (token.type === 'paren' && token.value !== ')') ) {
-        node.params.push(walk())
+      let node = {
+        type: 'Vector',
+        values: [],
+      }
+
+      while ( (token.type !== 'bracket') ) {
+        node.values.push(walk())
         token = tokens[current]
       }
 

@@ -1,0 +1,2 @@
+(def foo (fn [x] (add x x)))
+(println (foo 2))

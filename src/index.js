@@ -14,6 +14,21 @@ module.exports = () => {
       console.log(val)
     })
 
+    globalEnv.def('rect', function(x, y, w, h) {
+      console.log(`Drawing a rect a ${x}, ${y} with size ${w}*${h}`)
+      return {x, y, w, h}
+    })
+
+    globalEnv.def('style', function(style, ...items) {
+      console.log(style)
+      console.log(`Applying ${style} to ${items}`)
+    })
+
+    globalEnv.def('fill', function(color) {
+      console.log(color)
+      return color
+    })
+
     globalEnv.def('add', function(a, b) {
       return a + b
     })
