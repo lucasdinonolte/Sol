@@ -3,11 +3,9 @@ A declarative functional language for creative coding. Initially created to
 learn more about parsers and interpreters.
 
 ```
-(def hello (add 4 2))
-
-(println
-  (sub hello (add 3 10))
-)
+(draw <1000 1000> [
+  (rect <200 200> <800 800> { :fill "black" })
+])
 ```
 
 ## Why Sol?
