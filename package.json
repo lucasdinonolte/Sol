@@ -1,10 +1,23 @@
 {
-  "name": "toy",
+  "name": "sol",
   "version": "0.0.1",
-  "description": "A stupid scripting language built for learning purposes",
-  "main": "index.js",
+  "main": "src/index.js",
   "license": "MIT",
+  "type": "module",
   "scripts": {
-    "cli": "node src/cli.js"
+    "cli": "node src/cli.js",
+    "dev": "nodemon src/cli.js examples/draw.sol"
+  },
+  "bin": {
+    "sol": "src/cli.js"
+  },
+  "dependencies": {
+    "chokidar": "^3.5.2",
+    "express": "^4.17.2",
+    "socket.io": "^4.4.0",
+    "yargs": "^17.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   }
 }

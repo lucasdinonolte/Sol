@@ -1,2 +1,0 @@
-(def sum (add 4 4))
-(println sum)

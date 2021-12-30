@@ -1,5 +1,11 @@
-module.exports = (tokens) => {
+export default (tokens) => {
   let current = 0
+  let hasOpen = false
+
+  const error = (message) => {
+    const lastToken = tokens[current - 1]
+    throw new Error(`${message} (${lastToken.line}:${lastToken.column})`)
+  }
 
   const walk = () => {
     let token = tokens[current]
@@ -48,11 +54,11 @@ module.exports = (tokens) => {
       if (token.type === 'paren' && token.value === '(') {
         node = {
           type: 'Program',
-          body: [],
+          params: [],
         }
 
         while ( (token.type !== 'paren') || (token.type === 'paren' && token.value !== ')') ) {
-          node.body.push(walk())
+          node.params.push(walk())
           token = tokens[current]
         }
       } else {
@@ -63,23 +69,30 @@ module.exports = (tokens) => {
             name: token.value,
             params: [],
           }
+        } else if (token.value === 'param') {
+          node = {
+            type: 'ExposedParameter',
+            params: [],
+          }
         } else if (token.value === 'if') {
           node = {
             type: 'Condition',
             params: [],
           }
-        } else if (token.value === 'fn') {
+        } else if (token.value === '=>') {
           node = {
             type: 'Function',
             name: token.value,
             params: []
           }
-        } else {
+        } else if (token.type === 'operator' || token.type === 'name') {
           node = {
             type: 'CallExpression',
             name: token.value,
             params: [],
           }
+        } else {
+          throw new Error('Unknown List Type')
         }
 
         token = tokens[++current]
@@ -87,7 +100,30 @@ module.exports = (tokens) => {
         while ( (token.type !== 'paren') || (token.type === 'paren' && token.value !== ')') ) {
           node.params.push(walk())
           token = tokens[current]
+
+          if (token === undefined) error('Unbalanced Parenthesis')
         }
+      }
+
+      hasOpen = false
+
+      current++
+      return node
+    }
+
+    if (token.type === 'operator' && token.value === '<') {
+      token = tokens[++current]
+
+      let node = {
+        type: 'Vector',
+        values: [],
+      }
+
+      while ( (token.value !== '>') ) {
+        node.values.push(walk())
+        token = tokens[current]
+
+        if (token === undefined) error('Unclosed Vector')
       }
 
       current++
@@ -98,11 +134,11 @@ module.exports = (tokens) => {
       token = tokens[++current]
 
       let node = {
-        type: 'Vector',
+        type: 'List',
         values: [],
       }
 
-      while ( (token.type !== 'bracket') ) {
+      while ( (token.value !== ']') ) {
         node.values.push(walk())
         token = tokens[current]
       }
@@ -111,16 +147,42 @@ module.exports = (tokens) => {
       return node
     }
 
-    throw new TypeError(token.type)
+    if (token.type === 'curly' && token.value === '{') {
+      token = tokens[++current]
+
+      let node = {
+        type: 'Map',
+        values: []
+      }
+
+      while ( (token.type !== 'curly' && token.value !== '}') ) {
+        node.values.push(walk())
+        token = tokens[current]
+      }
+
+      current++
+      return node
+    }
+
+    if (token.type === 'symbol') {
+      current++
+
+      return {
+        type: 'Symbol',
+        value: token.value,
+      }
+    }
+
+    error(`Unexpected ${token.type}`)
   }
 
   let ast = {
     type: 'Program',
-    body: [],
+    params: [],
   }
 
   while (current < tokens.length) {
-    ast.body.push(walk());
+    ast.params.push(walk());
   }
 
   return ast

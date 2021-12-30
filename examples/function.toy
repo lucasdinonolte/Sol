@@ -1,2 +1,0 @@
-(def sayHello (fn [name] (join "Hallo" name)))
-(println (sayHello "Harald"))

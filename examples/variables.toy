@@ -1,2 +1,0 @@
-(def hello "Hello Variables!")
-(println hello)

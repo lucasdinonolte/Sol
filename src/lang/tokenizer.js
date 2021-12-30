@@ -1,9 +1,11 @@
-module.exports = (input) => {
+export default (input) => {
   const WHITESPACE = /\s/
-  const NUMBERS = /[0-9.-]/
+  const NUMBERS = /[0-9.]/
   const LETTERS = /[a-z]/i
   const COLOR = /[0-9a-z]/i
-  const KEYWORDS = ' def fn if '
+  const NAME = /[a-z0-9\/\?-]/i
+  const OPERATORS = '+-*/%=<>!'
+  const KEYWORDS = ' def => if '
 
   let current = 0
   let line = 1
@@ -36,6 +38,8 @@ module.exports = (input) => {
       tokens.push({
         type: 'paren',
         value: '(',
+        line,
+        column,
       })
 
       continue
@@ -45,16 +49,29 @@ module.exports = (input) => {
       tokens.push({
         type: 'paren',
         value: ')',
+        line,
+        column,
       })
 
       continue
     }
 
+    // COMMENTS
+    if (ch === ';') {
+      while (peek() !== '\n' && !eof()) {
+        next()
+      }
+
+      continue
+    }
+    
     // BRACKETS
     if (ch === '[') {
       tokens.push({
         type: 'bracket',
         value: '[',
+        line,
+        column,
       })
 
       continue
@@ -64,7 +81,46 @@ module.exports = (input) => {
       tokens.push({
         type: 'bracket',
         value: ']',
+        line,
+        column,
       })
+
+      continue
+    }
+
+    // CURLY
+    if (ch === '{') {
+      tokens.push({
+        type: 'curly',
+        value: '{',
+        line,
+        column,
+      })
+
+      continue
+    }
+
+    if (ch === '}') {
+      tokens.push({
+        type: 'bracket',
+        value: '}',
+        line,
+        column,
+      })
+
+      continue
+    }
+
+    // SYMBOLDS
+    if (ch === ':') {
+      let value = ch 
+
+      while(LETTERS.test(peek())) {
+        ch = next()
+        value += ch
+      }
+
+      tokens.push({ type: 'symbol', value, line, column })
 
       continue
     }
@@ -83,13 +139,13 @@ module.exports = (input) => {
         value += ch
       }
 
-      tokens.push({ type: 'color', value })
+      tokens.push({ type: 'color', value, line, column })
 
       continue
     }
 
     // NUMBERS
-    if (NUMBERS.test(ch)) {
+    if (NUMBERS.test(ch) || (ch === '-' && NUMBERS.test(peek()))) {
       let value = ch 
 
       while(NUMBERS.test(peek())) {
@@ -97,7 +153,7 @@ module.exports = (input) => {
         value += ch
       }
 
-      tokens.push({ type: 'number', value })
+      tokens.push({ type: 'number', value, line, column })
 
       continue
     }
@@ -111,9 +167,26 @@ module.exports = (input) => {
       while (ch !== '"') {
         value += ch
         ch = next()
+        
+        if (eof()) {
+          error('Unterminated String')
+        }
       }
 
-      tokens.push({ type: 'string', value })
+      tokens.push({ type: 'string', value, line, column })
+
+      continue
+    }
+
+    if (OPERATORS.includes(ch)) {
+      let value = ch
+
+      while (OPERATORS.includes(peek())) {
+        ch = next()
+        value += ch 
+      }
+
+      tokens.push({ type: 'operator', value, line, column })
 
       continue
     }
@@ -122,15 +195,15 @@ module.exports = (input) => {
     if (LETTERS.test(ch)) {
       let value = ch 
 
-      while (LETTERS.test(peek())) {
+      while (NAME.test(peek())) {
         ch = next()
         value += ch
       }
 
       if (KEYWORDS.includes(` ${value} `)) {
-        tokens.push({ type: 'keyword', value })
+        tokens.push({ type: 'keyword', value, line, column })
       } else {
-        tokens.push({ type: 'name', value })
+        tokens.push({ type: 'name', value, line, column })
       }
 
       continue
