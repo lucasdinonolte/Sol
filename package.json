@@ -1,12 +1,15 @@
 {
   "name": "sol",
   "version": "0.0.1",
-  "main": "src/index.js",
+  "description": "A declarative functional language for 2D graphics coding",
+  "main": "src/cli.js",
+  "author": "Lucas Dino Nolte <hello@lucas-nolte.com> (https://lucas-nolte.com)",
   "license": "MIT",
   "type": "module",
   "scripts": {
     "cli": "node src/cli.js",
-    "dev": "nodemon src/cli.js examples/draw.sol"
+    "dev": "concurrently 'nodemon src/cli.js examples/draw.sol' 'rollup -c -w'",
+    "build": "rollup -c"
   },
   "bin": {
     "sol": "src/cli.js"
@@ -18,6 +21,18 @@
     "yargs": "^17.3.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.15"
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-node-resolve": "^11.0.0",
+    "concurrently": "^6.5.1",
+    "nodemon": "^2.0.15",
+    "rollup": "^2.3.4",
+    "rollup-plugin-css-only": "^3.1.0",
+    "rollup-plugin-livereload": "^2.0.0",
+    "rollup-plugin-svelte": "^7.0.0",
+    "rollup-plugin-terser": "^7.0.0",
+    "svelte": "^3.0.0"
+  },
+  "directories": {
+    "examples": "examples"
   }
 }

@@ -59,7 +59,7 @@ const start = (_file, port = 3000) => {
     socket.on("disconnect", () => delete sockets[id])
   })
   
-  app.use(express.static(path.join(__dirname, "public")))
+  app.use(express.static(path.join(__dirname, "../", "../", "public")))
 
   server.listen(port)
   console.log(`Sol running at http://127.0.0.1:${port}`)

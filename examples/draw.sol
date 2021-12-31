@@ -1,9 +1,7 @@
-; Draws horizontal stripes to the screen
-
 (def size 500)
-(def c 20)
+(def c 40)
 (def h (/ size (* 2 c)))
-(def rectStyle { :fill "#000000" })
+(def rectStyle { :fill "#ff0000" })
 
 (draw <size size> [
   (map (range c) (=> [n i] (
