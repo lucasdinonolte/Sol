@@ -3,10 +3,8 @@ import tokenizer from '../lang/tokenizer.js'
 import parser from '../lang/parser.js'
 import { Environment, evaluate } from '../lang/interpreter.js'
 
-
-const rep = (code) => {
-  const repl_env = new Environment() 
-  return evaluate(parser(tokenizer(code)), repl_env)
+const rep = (code, env) => {
+  return evaluate(parser(tokenizer(code)), env)
 }
 
 export default rep

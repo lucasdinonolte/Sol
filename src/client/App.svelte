@@ -4,32 +4,35 @@
 
   const socket = io()
 
+  const dpr = window.devicePixelRatio || 1
+
   socket.on('render', (res) => {
     error = undefined
 
-    canvas.width = res.w
-    canvas.height = res.h
+    canvas.width = res.w * dpr
+    canvas.height = res.h * dpr
 
     const ctx = canvas.getContext('2d')
+    ctx.scale(dpr, dpr)
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    res.commands.flat().map((item) => {
-      const cmd = item[0]
-      const pos = item[1] || [0, 0]
-      const size = item[2] || [0, 0]
-      const style = item[3] || { fill: 'black' }
-
-      if (style.stroke) ctx.strokeStyle = style.stroke
-      if (style.fill) ctx.fillStyle = style.fill
-
-      const [x, y] = pos
-      const [w, h] = size
+    res.commands.map((item) => {
+      if (item.style.fill) ctx.fillStyle = item.style.fill
+      if (item.style.stroke) ctx.strokeStyle = item.style.stroke
 
       ctx.beginPath()
-      ctx[cmd](x, y, w, h)
 
-      if (style.stroke) ctx.stroke()
-      if (style.fill) ctx.fill()
+      item.commands.map(cmd => {
+        const command = cmd.command
+
+        if (command === 'moveTo') ctx.moveTo(cmd.points[0], cmd.points[1])
+        if (command === 'lineTo') ctx.lineTo(cmd.points[0], cmd.points[1])
+        if (command === 'curveTo') ctx.bezierCurveTo(...cmd.points)
+        if (command === 'close') ctx.closePath()
+      })
+
+      if (item.style.fill) ctx.fill()
+      if (item.style.stroke) ctx.stroke()
     })
   })
 
@@ -44,16 +47,33 @@
       {error}
     </div>
   {/if}
-  <canvas bind:this={canvas} />
+  <div
+    class="canvas"
+  >
+    <canvas
+      bind:this={canvas}
+      style={`transform: scale(${100 / dpr}%)`}
+    />
+  </div>
 </main>
 
-<style>
+<style global>
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+
   main {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: relative;
     width: 100vw;
-    min-height: 100vh;
+    height: 100vh;
+  }
+
+  .canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
   .error {

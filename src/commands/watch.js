@@ -1,3 +1,5 @@
+import readline from 'readline'
+
 import express from 'express'
 import chokidar from 'chokidar'
 import { createServer } from 'http'
@@ -8,6 +10,11 @@ import fs from 'fs'
 import { fileURLToPath } from 'url'
 
 import rep from '../lang/rep.js'
+import tokenizer from '../lang/tokenizer.js'
+import parser from '../lang/parser.js'
+import { Environment, evaluate } from '../lang/interpreter.js'
+
+import { SOL_NAME, SOL_VERSION } from '../constants.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -17,11 +24,27 @@ const start = (_file, port = 3000) => {
   const server = createServer(app)
   const io = new Server(server)
 
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+  
+  let env = new Environment()
+  let res
+  let ast
+
+
   const sockets = {}
 
   const evaluateCode = (id) => {
+    env = new Environment()
+    env.onRender((tree) => render(tree))
     const content = fs.readFileSync(file, { encoding: "utf8" });
+    ast = parser(tokenizer(content))
+    evaluate(ast, env)
+  }
 
+  const render = (tree, id) => {
     const doEmit = (id, res) => {
       sockets[id].emit('render', res)
     }
@@ -30,19 +53,10 @@ const start = (_file, port = 3000) => {
       sockets[id].emit('error', err) 
     }
 
-    let res
-
-    try {
-      res = rep(content)
-    } catch (e) {
-      Object.keys(sockets).forEach(id => emitError(id, e.toString())) 
-      return
-    }
-
     if (id) {
-      doEmit(id, res)
+      doEmit(id, tree)
     } else {
-      Object.keys(sockets).forEach(id => doEmit(id, res))
+      Object.keys(sockets).forEach(id => doEmit(id, tree))
     }
   }
 
@@ -54,7 +68,7 @@ const start = (_file, port = 3000) => {
     const { id } = socket
     sockets[id] = socket
 
-    evaluateCode(id)
+    evaluateCode()
 
     socket.on("disconnect", () => delete sockets[id])
   })
@@ -62,7 +76,19 @@ const start = (_file, port = 3000) => {
   app.use(express.static(path.join(__dirname, "../", "../", "public")))
 
   server.listen(port)
-  console.log(`Sol running at http://127.0.0.1:${port}`)
+  evaluateCode()
+
+  rl.on('line', (input) => {
+    try {
+      if (input) console.log(rep(input, env))
+    } catch (e) {
+      console.warn(`Error: ${e}`)
+    }
+    rl.prompt()
+  })
+
+  rep(`(println (str "${SOL_NAME} ${SOL_VERSION} running at http://127.0.0.1:${port}"))`, env)
+  rl.prompt()
 }
 
 export default start

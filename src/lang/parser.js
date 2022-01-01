@@ -65,7 +65,21 @@ export default (tokens) => {
         if (token.value === 'def') {
           token = tokens[++current]
           node = {
-            type: 'Assignment',
+            type: 'NamedFunction',
+            name: token.value,
+            params: [],
+          }
+        } else if (token.value === 'const') {
+          token = tokens[++current]
+          node = {
+            type: 'ConstAssignment',
+            name: token.value,
+            params: [],
+          }
+        } else if (token.value === 'let') {
+          token = tokens[++current]
+          node = {
+            type: 'StateAssignment',
             name: token.value,
             params: [],
           }
@@ -79,11 +93,18 @@ export default (tokens) => {
             type: 'Condition',
             params: [],
           }
-        } else if (token.value === '=>') {
+        } else if (token.value === 'fn') {
           node = {
             type: 'Function',
             name: token.value,
             params: []
+          }
+        } else if (token.value === '=>') {
+          token = tokens[++current]
+          node = {
+            type: 'Derivative',
+            name: token.value,
+            params: [],
           }
         } else if (token.type === 'operator' || token.type === 'name') {
           node = {

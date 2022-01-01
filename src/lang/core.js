@@ -1,13 +1,16 @@
 import { SOL_VERSION } from '../constants.js'
+import Path from './lib/Path.js'
 
-const core = [
+const core = (ENV) => ([
   // META
   ['VERSION', SOL_VERSION],
+  ['STATE', ENV.state],
   
   // BASIC TYPES
   ['true', true],
   ['false', false],
   ['nil', null],
+  ['env', ENV],
 
   // BASIC MATH
   ['+', (...a) => {
@@ -94,14 +97,29 @@ const core = [
 
   // DRAWING
   // functions to build the render tree
-  ['draw', (size, items) => ({
-    w: size.x,
-    h: size.y,
-    commands: [items].flat()
+  ['draw', (items) => ENV.render({
+    w: ENV.has('SIZE') ? ENV.get('SIZE').x : 1000,
+    h: ENV.has('SIZE') ? ENV.get('SIZE').y : 1000,
+    commands: [items].flat(10).map(i => ({
+      style: i.styles,
+      commands: i.toInstruction(),
+    })),
   })],
-  ['rect', (pos, size, styles) => ['rect', [pos.x, pos.y], [size.x, size.y], styles]],
-  ['ellipse', (pos, size, styles) => ['ellipse', [pos.x, pos.y], [size.x, size.y], styles]],
-  ['circle', (pos, radius, styles) => ['ellipse', [pos.x, pos.y], [radius, radius], styles]],
+  ['rect', (pos, size, styles) => {
+    const rect = Path.Rectangle(pos.x, pos.y, size.x, size.y)
+    rect.applyStyles(styles)
+    return rect
+  }],
+  ['circle', (pos, radius, styles) => {
+    const circle = Path.Circle(pos.x, pos.y, radius)
+    circle.applyStyles(styles)
+    return circle
+  }],
+  ['line', (from, to, styles) => {
+    const line = Path.Line(from.x, from.y, to.x, to.y)
+    line.applyStyles(styles)
+    return line
+  }],
 
   // UTILS
   ['degrees', (x) => x * (180 / Math.PI)],
@@ -187,10 +205,6 @@ const core = [
   // DEBUGGERS
   ['println', (...args) => console.log(args.map(a => a !== null ? a.toString() : '').join())],
   ['json', (a) => JSON.stringify(a, null, 4)],
-]
-
-Object.getOwnPropertyNames(Math).filter(k => k !== 'random').forEach(k => {
-  core.push([k, Math[k]])
-})
+])
 
 export default core
