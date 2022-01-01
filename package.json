@@ -9,7 +9,8 @@
   "scripts": {
     "cli": "node src/cli.js",
     "dev": "concurrently 'nodemon src/cli.js examples/arcs-from-adjacent-corners.sol' 'rollup -c -w'",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest test/"
   },
   "bin": {
     "sol": "src/cli.js"
@@ -24,6 +25,7 @@
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-node-resolve": "^11.0.0",
     "concurrently": "^6.5.1",
+    "jest": "^27.4.5",
     "nodemon": "^2.0.15",
     "rollup": "^2.3.4",
     "rollup-plugin-css-only": "^3.1.0",

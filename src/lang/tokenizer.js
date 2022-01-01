@@ -4,7 +4,7 @@ export default (input) => {
   const LETTERS = /[a-z]/i
   const COLOR = /[0-9a-z]/i
   const NAME = /[a-z0-9\/\?-]/i
-  const OPERATORS = '+-*/%=<>!'
+  const OPERATORS = ' + - * / % = < <= > >= ! '
   const KEYWORDS = ' def let const fn => if '
 
   let current = 0
@@ -165,12 +165,12 @@ export default (input) => {
       let ch = next()
 
       while (ch !== '"') {
-        value += ch
-        ch = next()
-        
         if (eof()) {
           error('Unterminated String')
         }
+
+        value += ch
+        ch = next()
       }
 
       tokens.push({ type: 'string', value, line, column })
@@ -178,12 +178,13 @@ export default (input) => {
       continue
     }
 
-    if (OPERATORS.includes(ch)) {
+    // OPERATORS
+    if (OPERATORS.includes(` ${ch} `)) {
       let value = ch
 
-      while (OPERATORS.includes(peek())) {
+      while (OPERATORS.includes(` ${value}${peek()} `) && !eof()) {
         ch = next()
-        value += ch 
+        value += ch
       }
 
       tokens.push({ type: 'operator', value, line, column })
