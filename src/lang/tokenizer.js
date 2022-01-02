@@ -1,11 +1,11 @@
 export default (input) => {
   const WHITESPACE = /\s/
   const NUMBERS = /[0-9.]/
-  const LETTERS = /[a-z]/i
+  const LETTERS = /[a-z$]/i
   const COLOR = /[0-9a-z]/i
   const NAME = /[a-z0-9\/\?-]/i
   const OPERATORS = ' + - * / % = < <= > >= ! '
-  const KEYWORDS = ' def let const fn => if '
+  const KEYWORDS = ' def let const fn $ if '
 
   let current = 0
   let line = 1

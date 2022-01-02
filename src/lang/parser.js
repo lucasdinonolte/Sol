@@ -76,13 +76,6 @@ export default (tokens) => {
             name: token.value,
             params: [],
           }
-        } else if (token.value === 'let') {
-          token = tokens[++current]
-          node = {
-            type: 'StateAssignment',
-            name: token.value,
-            params: [],
-          }
         } else if (token.value === 'param') {
           node = {
             type: 'ExposedParameter',
@@ -99,10 +92,10 @@ export default (tokens) => {
             name: token.value,
             params: []
           }
-        } else if (token.value === '=>') {
+        } else if (token.value === '$') {
           token = tokens[++current]
           node = {
-            type: 'Derivative',
+            type: 'StateAssignment',
             name: token.value,
             params: [],
           }
@@ -113,7 +106,11 @@ export default (tokens) => {
             params: [],
           }
         } else {
-          throw new Error('Unknown List Type')
+          node = {
+            type: 'Program',
+            params: [],
+          }
+          token = tokens[--current]
         }
 
         token = tokens[++current]

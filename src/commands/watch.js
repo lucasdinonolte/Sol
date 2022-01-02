@@ -9,7 +9,6 @@ import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
 
-import rep from '../lang/rep.js'
 import tokenizer from '../lang/tokenizer.js'
 import parser from '../lang/parser.js'
 import { Environment, evaluate } from '../lang/interpreter.js'
@@ -24,6 +23,8 @@ const start = (_file, port = 3000) => {
   const server = createServer(app)
   const io = new Server(server)
 
+  const rep = (input, _env) => evaluate(parser(tokenizer(input)), _env)
+
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -32,7 +33,6 @@ const start = (_file, port = 3000) => {
   let env = new Environment()
   let res
   let ast
-
 
   const sockets = {}
 

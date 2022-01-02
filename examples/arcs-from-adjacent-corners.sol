@@ -1,8 +1,8 @@
-(let s 1000)
-(let c 100)
+($ s 1000)
+($ c 100)
 
-(=> SIZE [s] <s s>)
-(=> maxR [s] (* 2 s))
+($ SIZE [s] <s s>)
+($ maxR [s] (* 2 s))
 
 (def drawCircles [num origin] (
   (map (range num) (fn [n i] (
@@ -16,14 +16,14 @@
 (const BR <1 1>)
 (const CENTER <0.5 0.5>)
 
-(let positions [
+($ positions ([
   BL
   BR
-])
+]))
 
-(let bgColor #121212)
+($ bgColor #121212)
 
-(=> output [SIZE c positions bgColor] (draw [
+($ output [SIZE c positions bgColor] (draw [
   (rect <0 0> <s s> { :fill bgColor })
   (map positions (fn [pos] (
     (drawCircles c <(* s (vec/x pos)) (* s (vec/y pos))>)

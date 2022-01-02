@@ -51,15 +51,26 @@ describe('Sol Language', () => {
     })
 
     it('should assign lets', () => {
-      expect(rep('(let a "b") a')).toBe('b')
+      expect(rep('($ a "b") a')).toBe('b')
+      expect(rep('($ a 10) a')).toBe(10)
     })
 
     it('should allow overriding of let values', () => {
-      expect(rep('(let a "b") (let a "c") a')).toBe('c')
+      expect(rep('($ a "b") ($ a "c") a')).toBe('c')
     })
 
     it('should not allow let in nested scopes', () => {
       expect(() => rep('(def myFunction [] ((let a "b"))) (myFunction)')).toThrow()
+    })
+
+    it('should assign reactive lets', () => {
+      expect(rep('($ a "b") a')).toBe('b')
+      expect(rep('($ a [] "b") a')).toBe('b')
+    })
+
+    it('should update reactive lets when a watched let changes', () => {
+      expect(rep('($ a 10) ($ b [a] (* a 2)) b')).toBe(20)
+      expect(rep('($ a 10) ($ b [a] (* a 2)) ($ a 20) b')).toBe(40)
     })
   })
 })

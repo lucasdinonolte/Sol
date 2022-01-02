@@ -10,7 +10,7 @@
     "cli": "node src/cli.js",
     "dev": "concurrently 'nodemon src/cli.js examples/arcs-from-adjacent-corners.sol' 'rollup -c -w'",
     "build": "rollup -c",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest test/"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest test/ --verbose"
   },
   "bin": {
     "sol": "src/cli.js"

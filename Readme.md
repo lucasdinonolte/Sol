@@ -3,23 +3,6 @@ A declarative functional and reactive language for creative coding. Initially cr
 learn more about parsers and interpreters.
 
 ```
-; let declares state
-; state can be changed and will cause a re-render
-(let s 1000)
-(let c 100)
-
-; => declares a derived value
-; will be re-calculated if s changes
-(=> SIZE [s] <s s>)
-(=> maxR [s] (* 2 s))
-
-; def declares a named function
-(def drawCircles [num origin] (
-  (map (range num) (fn [n i] (
-    (circle origin (* (+ 1 i) (/ maxR num)) { :stroke #f1f1f1 })
-  )))
-))
-
 ; const declares a constant
 ; cannot be changed
 (const TL <0 0>)
@@ -28,14 +11,29 @@ learn more about parsers and interpreters.
 (const BR <1 1>)
 (const CENTER <0.5 0.5>)
 
-(let positions [
-  BL
-  BR
-])
+; $ declares state
+; state can be changed and will cause a re-render
+($ s 1000)
+($ c 100)
+($ bgColor #121212)
 
-(let bgColor #121212)
+; Lists need to be wrapped so they
+; don't get mistaken for watched variable
+($ positions ([ BL BR ]))
 
-(=> output [SIZE c positions bgColor] (draw [
+; You can also pass other state variables to watch
+; will be re-calculated if s changes
+($ SIZE [s] <s s>)
+($ maxR [s] (* 2 s))
+
+; def declares a named function
+(def drawCircles [num origin] (
+  (map (range num) (fn [n i] (
+    (circle origin (* (+ 1 i) (/ maxR num)) { :stroke #f1f1f1 })
+  )))
+))
+
+($ output [SIZE c positions bgColor] (draw [
   (rect <0 0> <s s> { :fill bgColor })
   (map positions (fn [pos] (
     (drawCircles c <(* s (vec/x pos)) (* s (vec/y pos))>)

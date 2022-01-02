@@ -125,14 +125,13 @@ const evaluate = (exp, env) => {
     case 'ConstAssignment':
       return env.def(exp.name, evaluate(exp.params[0], env))
     case 'StateAssignment':
-      return env.set(exp.name, evaluate(exp.params[0], env), false)
-    case 'Derivative':
+      const isObserving = exp.params[0].type === 'List'
       const name = exp.name  
-      const vars = exp.params[0].values.map(i => i.value)
-      const body = exp.params[1]
+      const vars = isObserving ? exp.params[0].values.map(i => i.value) : []
+      const body = isObserving ? exp.params[1] : exp.params[0]
       const value = evaluate(body, new Environment(env))
       env.set(exp.name, value, true)
-      env.watch(exp.name, vars, body)
+      if (isObserving) env.watch(exp.name, vars, body)
       return value
     case 'CallExpression':
       const func = env.get(exp.name)
