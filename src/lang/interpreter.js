@@ -1,20 +1,27 @@
 import core from './core.js'
 import Vector from './lib/Vector.js'
-import Observable from './lib/Observable.js'
+import DependencyGraph from './lib/DependencyGraph.js'
 
 class Environment {
   constructor(parent) {
     this.vars = Object.create(parent ? parent.vars : null)
     this.state = Object.create(parent ? parent.state : null)
+    this.dependencies = parent ? parent.dependencies : new DependencyGraph()
     if (!parent) this.loadCore()
     this.parent = parent
     this.handlers = []
+    this.dirtyState = new Set()
+    this.isRecalculating = false
   }
 
   loadCore() {
     core(this).forEach(item => {
       this.def(item[0], item[1])
     })
+  }
+
+  needsRecalculation() {
+    return this.dirtyState.size > 0
   }
 
   has(name) {
@@ -27,25 +34,43 @@ class Environment {
     this.vars[name] = value
   }
 
-  set(name, value, derived = false) {
+  set(name, body) {
     if (this.parent) throw new Error(`Let is only allowed in the root scope. Use const instead.`)
+    const evaluated = evaluate(body, this)
     if (!(name in this.state)) {
-      this.state[name] = new Observable(value, derived)
+      this.state[name] = evaluated
     } else {
-      this.state[name].update(value)
+      this.state[name] = evaluated
+      this.dependencies.dependantsOf(name).forEach(i => this.dirtyState.add(i))
+      if (!this.isRecalculating) this.recalculateState()
     }
 
-    return value
+    this.dependencies.addNode(name, body)
+
+    return evaluated
   }
 
   watch(name, vars, body) {
     if (!name in this.state) throw new Error('Unknow watcher')
 
+    // Purge any existing dependencies
+    // This should keep the dependency tree clean at all times
+    this.dependencies.removeDependencies(name) 
+
     vars.forEach(v => {
-      this.state[v].subscribe(() => {
-        this.set(name, evaluate(body, new Environment(this)))
-      })
+      this.dependencies.addDependency(name, v)
     })
+  }
+
+  recalculateState() {
+    this.isRecalculating = true
+    while (this.needsRecalculation()) {
+      for (let name of this.dirtyState) {
+        this.set(name, this.dependencies.getNode(name))
+        this.dirtyState.delete(name) 
+      }
+    }
+    this.isRecalculating = false
   }
 
   get(name) {
@@ -53,7 +78,7 @@ class Environment {
       const val = this.vars[name] || null
       return val
     } else if (name in this.state) {
-      const val = this.state[name].getValue()
+      const val = this.state[name]
       return val
     }
     throw new Error(`Undefined variable ${name}`)
@@ -130,7 +155,7 @@ const evaluate = (exp, env) => {
       const vars = isObserving ? exp.params[0].values.map(i => i.value) : []
       const body = isObserving ? exp.params[1] : exp.params[0]
       const value = evaluate(body, new Environment(env))
-      env.set(exp.name, value, true)
+      env.set(exp.name, body, true)
       if (isObserving) env.watch(exp.name, vars, body)
       return value
     case 'CallExpression':

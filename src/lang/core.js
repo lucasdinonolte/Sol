@@ -105,7 +105,7 @@ const core = (ENV) => ([
       commands: i.toInstruction(),
     })),
   })],
-  ['rect', (pos, size, styles) => {
+  ['rectangle', (pos, size, styles) => {
     const rect = Path.Rectangle(pos.x, pos.y, size.x, size.y)
     rect.applyStyles(styles)
     return rect
@@ -120,6 +120,11 @@ const core = (ENV) => ([
     line.applyStyles(styles)
     return line
   }],
+  // @TODO
+  ['path', 'TODO'],
+  ['ellipse', 'TODO'],
+  ['triangle', 'TODO'],
+  ['polygon', 'TODO'],
 
   // UTILS
   ['degrees', (x) => x * (180 / Math.PI)],

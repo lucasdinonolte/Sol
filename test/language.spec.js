@@ -72,5 +72,9 @@ describe('Sol Language', () => {
       expect(rep('($ a 10) ($ b [a] (* a 2)) b')).toBe(20)
       expect(rep('($ a 10) ($ b [a] (* a 2)) ($ a 20) b')).toBe(40)
     })
+
+    it('should not allow circular dependencies', () => {
+      expect(() => rep('($ a "b") ($ b [a] "b") ($a [b] "c")')).toThrow()
+    })
   })
 })

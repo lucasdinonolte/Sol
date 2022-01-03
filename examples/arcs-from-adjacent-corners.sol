@@ -24,7 +24,7 @@
 ($ bgColor #121212)
 
 ($ output [SIZE c positions bgColor] (draw [
-  (rect <0 0> <s s> { :fill bgColor })
+  (rectangle <0 0> <s s> { :fill bgColor })
   (map positions (fn [pos] (
     (drawCircles c <(* s (vec/x pos)) (* s (vec/y pos))>)
   )))

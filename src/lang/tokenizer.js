@@ -1,3 +1,5 @@
+import { Keywords } from './tokens.js'
+
 export default (input) => {
   const WHITESPACE = /\s/
   const NUMBERS = /[0-9.]/
@@ -5,7 +7,7 @@ export default (input) => {
   const COLOR = /[0-9a-z]/i
   const NAME = /[a-z0-9\/\?-]/i
   const OPERATORS = ' + - * / % = < <= > >= ! '
-  const KEYWORDS = ' def let const fn $ if '
+  const KEYWORDS = ` ${Object.values(Keywords).join(' ')} `
 
   let current = 0
   let line = 1

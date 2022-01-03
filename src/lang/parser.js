@@ -1,3 +1,5 @@
+import { Keywords } from './tokens.js'
+
 export default (tokens) => {
   let current = 0
   let hasOpen = false
@@ -62,37 +64,32 @@ export default (tokens) => {
           token = tokens[current]
         }
       } else {
-        if (token.value === 'def') {
+        if (token.value === Keywords.NAMED_FUNCTION_DEFINITION) {
           token = tokens[++current]
           node = {
             type: 'NamedFunction',
             name: token.value,
             params: [],
           }
-        } else if (token.value === 'const') {
+        } else if (token.value === Keywords.CONSTANT_DEFINITION) {
           token = tokens[++current]
           node = {
             type: 'ConstAssignment',
             name: token.value,
             params: [],
           }
-        } else if (token.value === 'param') {
-          node = {
-            type: 'ExposedParameter',
-            params: [],
-          }
-        } else if (token.value === 'if') {
+        } else if (token.value === Keywords.CONSTANT_DEFINITION) {
           node = {
             type: 'Condition',
             params: [],
           }
-        } else if (token.value === 'fn') {
+        } else if (token.value === Keywords.ANONYMOUS_FUNCTION) {
           node = {
             type: 'Function',
             name: token.value,
             params: []
           }
-        } else if (token.value === '$') {
+        } else if (token.value === Keywords.STATE_DEFINITION) {
           token = tokens[++current]
           node = {
             type: 'StateAssignment',
